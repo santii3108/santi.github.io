@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Armador de equipo</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: hidden;
+        }
+
+        .app-container {
+          position: relative;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+        }
+  
+        .app {
+          width: 800px;
+          background: #2a2a2a;
+          padding: 10px 20px 20px 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+          box-sizing: border-box;
+          position: relative;
+          height: auto;
+          overflow: visible;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+        }
+      
+        .contenedor {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          height: 620px;
+          margin-bottom: 10px;
+          overflow: hidden;
+        }
+      
+        .seleccion,
+        .output {
+          flex: 1;
+          background: #333;
+          padding: 15px 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+          display: flex;
+          flex-direction: column;
+          box-sizing: border-box;
+        }
+      
+        ul {
+          padding: 0;
+          margin: 0;
+        }
+      
+        li {
+          margin: 5px 0;
+          padding: 10px;
+          background: #444;
+          border-radius: 4px;
+          list-style: none;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+      
+        li img {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+        }
+      
+        li.seleccionado {
+          background-color: #007bff;
+          color: white;
+        }
+
+        li.forzado-sale {
+          background-color: #28a745;
+          color: white;
+        }
+
+        li.forzado-no-sale {
+          background-color: #dc3545;
+          color: white;
+        }
+
+        li p {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .kd {
+            margin-left: auto;
+            color: #ccc;
+            position: relative;
+        }
+      
+        button {
+          margin-top: 20px;
+          width: 100%;
+          padding: 15px;
+          font-size: 18px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+      
+        button:hover {
+          background-color: #0056b3;
+        }
+
+        .menu-button {
+          position: absolute;
+          top: 0px;
+          left: 1330px;
+          width: 28px;
+          height: 28px;
+          background-color: #2a2a2a;
+          border: none;
+          border-radius: 6px;
+          color: white;
+          cursor: pointer;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+
+        .menu-button:hover {
+          background-color: #333;
+        }
+
+        .side-menu {
+          position: absolute;
+          top: 0;
+          left: 820px;
+          width: 320px;
+          height: 725px;
+          background: #2a2a2a;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+          padding: 20px;
+          box-sizing: border-box;
+          opacity: 0;
+          transform: translateX(50px);
+          transition: all 0.3s ease;
+          pointer-events: none;
+        }
+
+        .side-menu.open {
+          opacity: 1;
+          transform: translateX(0);
+          pointer-events: all;
+        }
+
+        .side-menu h3 {
+          margin-top: 0;
+          margin-bottom: 15px;
+          color: #e0e0e0;
+          text-align: center;
+        }
+
+        .side-menu .legend {
+          margin-bottom: 20px;
+          font-size: 14px;
+          color: #ccc;
+        }
+
+        .side-menu .legend-item {
+          display: flex;
+          align-items: center;
+          margin-bottom: 8px;
+          gap: 10px;
+        }
+
+        .side-menu .legend-color {
+          width: 20px;
+          height: 20px;
+          border-radius: 4px;
+        }
+
+        .legend-normal { background-color: #444; }
+        .legend-sale { background-color: #28a745; }
+        .legend-no-sale { background-color: #dc3545; }
+
+        .side-menu ul {
+          max-height: 580px;
+          overflow-y: auto;
+        }
+      
+        h2, h3, h4 {
+          color: #e0e0e0;
+          margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        h2 {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        h5 {
+            color: #444;
+            margin: 0;
+            padding: 0;
+        }
+      
+        #errorMsg {
+          color: #ff5c5c;
+          text-align: center;
+          display: none;
+          margin: 15px 30px 10px 30px;
+          padding: 12px 20px;
+          background-color: rgba(255, 92, 92, 0.1);
+          border-radius: 8px;
+          border: 1px solid rgba(255, 92, 92, 0.3);
+          font-size: 16px;
+          line-height: 1.4;
+        }
+
+        /* Contenedor del botón y mensaje de error */
+        .button-container {
+          position: relative;
+          width: 100%;
+        }
+
+        p {
+          margin: 0;
+          padding: 0;
+        }
+
+        .kd[title]:hover::before {
+            content: attr(title);
+            color: var(--msg-color);
+            margin-right: 8px;
+            font-weight: bold;
+            user-select: none;
+        }
+        .kd[title]:hover::after {
+            content: "";
+        }
+
+        .fade-in {
+          opacity: 0;
+          animation: fadeIn 0.5s forwards;
+        }
+        @keyframes fadeIn {
+          to {
+            opacity: 1;
+          }
+        }
+
+        #excludedTeam li {
+            color: #f0f0f0 !important;
+        }
+
+    </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="app">
+      
+      
+      <h2>Armador de equipos</h2>
+      <h5>*k/d actualizado al 8/6</h4>
+      <div class="contenedor">
+        <div class="seleccion">
+          <ul id="teamList">
+             <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/509515567728951306/502633cae6d54e19536fd65d8d1135d6?size=1024">
+              <p><span class="nombre">chito</span> <span class="kd">kd:1.60</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/549686804039598082/495aa9620ef9dcaba063210831315ad9?size=1024">
+              <p><span class="nombre">facu</span> <span class="kd">kd:1.17</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/549691241877471274/a90582078fc189cf433cd1602d025982?size=1024">
+              <p><span class="nombre">santi</span> <span class="kd">kd:1.06</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/429392376293883909/e2ddfc05e28ceef86541c730e1915e4a?size=1024">
+              <p><span class="nombre">golden</span> <span class="kd">kd:1.00</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/320302037726265345/9f18cba240ceeb1e5a6a121c5a523a93?size=1024">
+              <p><span class="nombre">bob</span> <span class="kd">kd:0.98</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/541304366955626507/6d965defe9e7e5590f9cb24fde8f250c?size=1024">
+              <p><span class="nombre">desi</span> <span class="kd">kd:0.95</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/496359246724857866/dfce7286c4c62a8471d4f421268b304e?size=1024">
+              <p><span class="nombre">agus</span> <span class="kd">kd:0.93</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/418444891518009356/b25ecaac2c53e201a846ad34a6c8f48c?size=1024">
+              <p><span class="nombre">mate</span> <span class="kd">kd:0.90</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/272075832304992256/54a03d078527234613442b8935c042c7?size=1024">
+              <p><span class="nombre">cufa</span> <span class="kd">kd:0.89</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/478608401795121152/795e6c285cd576af71012e06570e5437?size=1024">
+              <p><span class="nombre">soto</span> <span class="kd">kd:0.56</span></p>
+            </li>
+          </ul>
+        </div>
+        <div class="output">
+          <h3>Equipo seleccionado:</h3>
+          <ul id="selectedTeam"></ul>
+          <p id="promedioKD" style="text-align:center; margin-top:10px;"></p>
+          <h4 id="excluidosTitulo" style="display:none;">Quedaron afuera:</h4>
+          <ul id="excludedTeam"></ul>
+        </div>
+      </div>
+      
+      <div class="button-container">
+        <button onclick="randomizarEquipo()">Randomizar equipo</button>
+        <p id="errorMsg">
+        Seleccioná al menos 6 personas.
+        </p>
+      </div>
+    </div>
+
+    
+    <div class="side-menu" id="sideMenu">
+      
+      <h3>Configuración</h3>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color legend-normal"></div>
+          <span>Normal</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color legend-sale"></div>
+          <span>Sale seguro</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color legend-no-sale"></div>
+          <span>No sale</span>
+        </div>
+      </div>
+      <ul id="configList">
+        <li onclick="toggleConfig(this, 'chito')">
+          <img src="https://cdn.discordapp.com/avatars/509515567728951306/502633cae6d54e19536fd65d8d1135d6?size=1024">
+          <p><span class="nombre">chito</span> <span class="kd">kd:1.59</span></p>
+        </li>
+        <li onclick="toggleConfig(this, 'facu')">
+          <img src="https://cdn.discordapp.com/avatars/549686804039598082/495aa9620ef9dcaba063210831315ad9?size=1024">
+          <p><span class="nombre">facu</span> <span class="kd">kd:1.18</span></p>
+        </li>
+        <li onclick="toggleConfig(this, 'santi')">
+          <img src="https://cdn.discordapp.com/avatars/549691241877471274/a90582078fc189cf433cd1602d025982?size=1024">
+          <p><span class="nombre">santi</span> <span class="kd">kd:1.07</span></p>
+        </li>
+        <li onclick="toggleConfig(this, 'golden')">
+          <img src="https://cdn.discordapp.com/avatars/429392376293883909/e2ddfc05e28ceef86541c730e1915e4a?size=1024">
+          <p><span class="nombre">golden</span> <span class="kd">kd:1.00</span></p>
+        </li>
+        <li onclick="toggleConfig(this, 'bob')">
+          <img src="https://cdn.discordapp.com/avatars/320302037726265345/9f18cba240ceeb1e5a6a121c5a523a93?size=1024">
+          <p><span class="nombre">bob</span> <span class="kd">kd:0.98</span></p>
+        </li>
+        <li onclick="toggleConfig(this, 'desi')">
+          <img src="https://cdn.discordapp.com/avatars/541304366955626507/6d965defe9e7e5590f9cb24fde8f250c?size=1024">
+          <p><span class="nombre">desi</span> <span class="kd">kd:0.95</span></p>
+        </li>
+        <li onclick="toggleConfig(this, 'mate')">
+          <img src="https://cdn.discordapp.com/avatars/418444891518009356/b25ecaac2c53e201a846ad34a6c8f48c?size=1024">
+          <p><span class="nombre">mate</span> <span class="kd">kd:0.93</span></p>
+        </li>
+        <li onclick="toggleConfig(this, 'agus')">
+          <img src="https://cdn.discordapp.com/avatars/496359246724857866/dfce7286c4c62a8471d4f421268b304e?size=1024">
+          <p><span class="nombre">agus</span> <span class="kd">kd:0.90</span></p>
+        </li>
+        <li onclick="toggleConfig(this, 'cufa')">
+          <img src="https://cdn.discordapp.com/avatars/272075832304992256/54a03d078527234613442b8935c042c7?size=1024">
+          <p><span class="nombre">cufa</span> <span class="kd">kd:0.90</span></p>
+        </li>
+        <li onclick="toggleConfig(this, 'soto')">
+          <img src="https://cdn.discordapp.com/avatars/478608401795121152/795e6c285cd576af71012e06570e5437?size=1024">
+          <p><span class="nombre">soto</span> <span class="kd">kd:0.56</span></p>
+        </li>
+      </ul>
+    </div>
+  </div>
+<button class="menu-button" onclick="toggleMenu()"></button>
+  <script>
+    // Estado de configuración: normal, sale, no-sale
+    const playerConfig = {};
+
+    function toggleMenu() {
+      const menu = document.getElementById('sideMenu');
+      menu.classList.toggle('open');
+    }
+
+    function toggleConfig(elemento, playerName) {
+      const currentState = playerConfig[playerName] || 'normal';
+      
+      // Ciclo: normal -> sale -> no-sale -> normal
+      let newState;
+      if (currentState === 'normal') {
+        newState = 'sale';
+      } else if (currentState === 'sale') {
+        newState = 'no-sale';
+      } else {
+        newState = 'normal';
+      }
+      
+      playerConfig[playerName] = newState;
+      
+      // Actualizar clases CSS
+      elemento.classList.remove('forzado-sale', 'forzado-no-sale');
+      if (newState === 'sale') {
+        elemento.classList.add('forzado-sale');
+      } else if (newState === 'no-sale') {
+        elemento.classList.add('forzado-no-sale');
+      }
+    }
+
+    function toggleSeleccion(elemento) {
+      elemento.classList.toggle('seleccionado');
+    }
+
+async function randomizarEquipo() {
+  const boton = document.querySelector('button[onclick="randomizarEquipo()"]');
+  boton.disabled = true;
+
+  const seleccionados = Array.from(document.querySelectorAll('.seleccion li.seleccionado'));
+  const errorMsg = document.getElementById("errorMsg");
+
+  // Resetear listas y mensajes
+  const lista = document.getElementById("selectedTeam");
+  const listaExcluidos = document.getElementById("excludedTeam");
+  const titulo = document.getElementById("excluidosTitulo");
+  const promedioKD = document.getElementById("promedioKD");
+
+  lista.innerHTML = "";
+  listaExcluidos.innerHTML = "";
+  titulo.style.display = "none";
+  titulo.style.opacity = 0;
+  promedioKD.textContent = "";
+  promedioKD.style.opacity = 0;
+  errorMsg.style.display = "none";
+
+  if (seleccionados.length < 6) {
+    errorMsg.style.display = "block";
+    boton.disabled = false;
+    return;
+  }
+
+  // Obtener jugadores que DEBEN salir
+  const forzadosSale = seleccionados.filter(li => {
+    const nombre = li.querySelector('.nombre').textContent;
+    return playerConfig[nombre] === 'sale';
+  });
+
+  // Obtener jugadores que NO PUEDEN salir
+  const forzadosNoSale = seleccionados.filter(li => {
+    const nombre = li.querySelector('.nombre').textContent;
+    return playerConfig[nombre] === 'no-sale';
+  });
+
+  // Verificar que no haya más de 5 forzados a salir
+  if (forzadosSale.length > 5) {
+    errorMsg.textContent = "No pueden haber más de 5 jugadores forzados a salir.";
+    errorMsg.style.display = "block";
+    boton.disabled = false;
+    return;
+  }
+
+  // Jugadores disponibles para randomizar (los que no están forzados)
+  const disponibles = seleccionados.filter(li => {
+    const nombre = li.querySelector('.nombre').textContent;
+    const config = playerConfig[nombre] || 'normal';
+    return config === 'normal';
+  });
+
+  // Calcular cuántos más necesitamos del pool disponible
+  const necesarios = 5 - forzadosSale.length;
+  
+  // Verificar que tengamos suficientes jugadores disponibles
+  if (disponibles.length < necesarios) {
+    errorMsg.textContent = "No hay suficientes jugadores disponibles para completar el equipo.";
+    errorMsg.style.display = "block";
+    boton.disabled = false;
+    return;
+  }
+
+  // Randomizar los disponibles y tomar los necesarios
+  const mezcladosDisponibles = disponibles.sort(() => Math.random() - 0.5);
+  const elegidosDelPool = mezcladosDisponibles.slice(0, necesarios);
+
+  // Combinar forzados + elegidos del pool
+  const elegidos = [...forzadosSale, ...elegidosDelPool];
+  
+  // Los excluidos son todos los seleccionados menos los elegidos
+  const excluidosFinal = seleccionados.filter(li => !elegidos.includes(li));
+
+  // Función helper para fadeIn
+  function fadeIn(element) {
+    element.style.opacity = 0;
+    element.style.display = element.tagName === "UL" ? "block" : "flex";
+    return new Promise(resolve => {
+      let op = 0;
+      const timer = setInterval(() => {
+        op += 0.05;
+        element.style.opacity = op;
+        if (op >= 1) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 50);
+    });
+  }
+
+  // Mostrar seleccionados uno por uno con fade y delay de 2 seg
+  for (let i = 0; i < elegidos.length; i++) {
+    const elem = elegidos[i];
+    const nuevo = document.createElement("li");
+    nuevo.style.display = 'flex';
+    nuevo.style.opacity = 0;
+    nuevo.innerHTML = elem.innerHTML;
+
+    const kdSpan = nuevo.querySelector(".kd");
+    const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
+    let msg = "";
+    if (kdValue > 1.5) msg = "GOAT";
+    else if (kdValue > 1) msg = "world class";
+    else if (kdValue < 0.7) msg = "incomprendido";
+    else if (kdValue < 1) msg = "burro";
+    kdSpan.setAttribute("data-kd", kdValue);
+    kdSpan.setAttribute("data-msg", msg);
+
+    lista.appendChild(nuevo);
+    await fadeIn(nuevo);
+    await new Promise(r => setTimeout(r, 2000));
+  }
+
+  // Calcular y mostrar KD promedio
+  let totalKD = 0;
+  elegidos.forEach(el => {
+    totalKD += parseFloat(el.querySelector(".kd").textContent.replace("kd:", ""));
+  });
+  const promedio = (totalKD / elegidos.length).toFixed(2);
+  promedioKD.textContent = `KD promedio: ${promedio}`;
+  promedioKD.style.textAlign = "center";
+
+  // Agregar excluidos a la lista sin animar individualmente
+  if (excluidosFinal.length > 0) {
+    titulo.style.display = "block";
+    listaExcluidos.innerHTML = "";
+    const mostrarFoto = excluidosFinal.length <= 3;
+
+    excluidosFinal.forEach(elem => {
+      const nuevo = document.createElement("li");
+      if (!mostrarFoto) {
+        let contenido = elem.innerHTML.replace(/<img[^>]*>/g, "");
+        nuevo.innerHTML = contenido;
+        nuevo.style.fontSize = "0.9em";
+        nuevo.style.padding = "5px 10px";
+      } else {
+        nuevo.innerHTML = elem.innerHTML;
+      }
+
+      const kdSpan = nuevo.querySelector(".kd");
+      if (kdSpan) {
+        const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
+        let msg = "";
+        if (kdValue > 1.5) msg = "GOAT";
+        else if (kdValue > 1) msg = "world class";
+        else if (kdValue < 0.7) msg = "incomprendido";
+        else if (kdValue < 1) msg = "burro";
+        kdSpan.setAttribute("data-kd", kdValue);
+        kdSpan.setAttribute("data-msg", msg);
+      }
+
+      listaExcluidos.appendChild(nuevo);
+    });
+
+    // Mostrar con fadeIn el título, excluidos y promedio juntos
+    await Promise.all([
+      fadeIn(titulo),
+      fadeIn(listaExcluidos),
+      fadeIn(promedioKD)
+    ]);
+  } else {
+    // Si no hay excluidos, mostrar solo el promedio
+    await fadeIn(promedioKD);
+  }
+
+  boton.disabled = false;
+}
+
+        document.querySelectorAll(".kd").forEach(kdSpan => {
+        const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
+        let msg = "";
+        let color = "";
+
+        if (kdValue > 1.5) {
+          msg = "GOAT";
+          color = "gold";
+        } else if (kdValue >= 1) {
+          msg = "world class";
+          color = "#4cf";
+        } else if (kdValue < 0.7) {
+          msg = "incomprendido";
+          color = "orange";
+        } else if (kdValue < 1) {
+          msg = "burro";
+          color = "red";
+        }
+
+    kdSpan.setAttribute("title", msg);
+    kdSpan.style.setProperty("--msg-color", color);
+
+    document.querySelectorAll('.kd').forEach(kdSpan => {
+        const nombre = kdSpan.parentElement.querySelector('.nombre').textContent.toLowerCase();
+        if (nombre === 'facu') {
+            kdSpan.setAttribute('title', 'baitero de mierda');
+            kdSpan.style.setProperty('--msg-color', 'brown');
+    }
+    });
+
+  });
+
+  // Cerrar menú al hacer clic fuera
+  document.addEventListener('click', function(event) {
+    const menu = document.getElementById('sideMenu');
+    const menuButton = document.querySelector('.menu-button');
+    
+    if (!menu.contains(event.target) && !menuButton.contains(event.target)) {
+      menu.classList.remove('open');
+    }
+  });
+  </script>
+</body>
+</html>
