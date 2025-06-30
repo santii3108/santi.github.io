@@ -583,10 +583,10 @@ async function randomizarEquipo() {
       if (kdSpan) {
         const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
         let msg = "";
-        if (kdValue > 1.5) msg = "GOAT";
-        else if (kdValue > 1) msg = "world class";
-        else if (kdValue < 0.7) msg = "incomprendido";
-        else if (kdValue < 1) msg = "burro";
+        if (kdValue > 9) msg = "GOAT";
+        else if (kdValue > 7) msg = "world class";
+        else if (kdValue < 4) msg = "incomprendido";
+        else if (kdValue < 7) msg = "burro";
         kdSpan.setAttribute("data-kd", kdValue);
         kdSpan.setAttribute("data-msg", msg);
       }
