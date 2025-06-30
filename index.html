@@ -284,32 +284,32 @@
               <p><span class="nombre">chito</span> <span class="kd">10</span></p>
             </li>
             <li onclick="toggleSeleccion(this)">
-              <img src="https://cdn.discordapp.com/avatars/549686804039598082/495aa9620ef9dcaba063210831315ad9?size=1024">
-              <p><span class="nombre">facu</span> <span class="kd">4</span></p>
-            </li>
-            <li onclick="toggleSeleccion(this)">
               <img src="https://cdn.discordapp.com/avatars/549691241877471274/a90582078fc189cf433cd1602d025982?size=1024">
               <p><span class="nombre">santi</span> <span class="kd">8</span></p>
-            </li>
-            <li onclick="toggleSeleccion(this)">
-              <img src="https://cdn.discordapp.com/avatars/429392376293883909/e2ddfc05e28ceef86541c730e1915e4a?size=1024">
-              <p><span class="nombre">golden</span> <span class="kd">6</span></p>
             </li>
             <li onclick="toggleSeleccion(this)">
               <img src="https://cdn.discordapp.com/avatars/320302037726265345/9f18cba240ceeb1e5a6a121c5a523a93?size=1024">
               <p><span class="nombre">bob</span> <span class="kd">8</span></p>
             </li>
             <li onclick="toggleSeleccion(this)">
-              <img src="https://cdn.discordapp.com/avatars/541304366955626507/6d965defe9e7e5590f9cb24fde8f250c?size=1024">
-              <p><span class="nombre">desi</span> <span class="kd">5</span></p>
+              <img src="https://cdn.discordapp.com/avatars/429392376293883909/e2ddfc05e28ceef86541c730e1915e4a?size=1024">
+              <p><span class="nombre">golden</span> <span class="kd">6</span></p>
             </li>
             <li onclick="toggleSeleccion(this)">
               <img src="https://cdn.discordapp.com/avatars/496359246724857866/ffce7063810ba6c0f2927b7f599d2093?size=1024">
               <p><span class="nombre">agus</span> <span class="kd">6</span></p>
             </li>
             <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/541304366955626507/6d965defe9e7e5590f9cb24fde8f250c?size=1024">
+              <p><span class="nombre">desi</span> <span class="kd">5</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
               <img src="https://cdn.discordapp.com/avatars/418444891518009356/b25ecaac2c53e201a846ad34a6c8f48c?size=1024">
               <p><span class="nombre">mate</span> <span class="kd">5</span></p>
+            </li>
+            <li onclick="toggleSeleccion(this)">
+              <img src="https://cdn.discordapp.com/avatars/549686804039598082/495aa9620ef9dcaba063210831315ad9?size=1024">
+              <p><span class="nombre">facu</span> <span class="kd">4</span></p>
             </li>
             <li onclick="toggleSeleccion(this)">
               <img src="https://cdn.discordapp.com/avatars/272075832304992256/10f076d37a9031190ae4fb129b84c5db?size=1024">
@@ -581,7 +581,7 @@ async function randomizarEquipo() {
 
       const kdSpan = nuevo.querySelector(".kd");
       if (kdSpan) {
-        //const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
+        const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
         let msg = "";
         if (kdValue > 9) msg = "GOAT";
         else if (kdValue > 7) msg = "world class";
@@ -613,16 +613,16 @@ async function randomizarEquipo() {
         let msg = "";
         let color = "";
 
-        if (kdValue > 1.5) {
+        if (kdValue > 9) {
           msg = "GOAT";
           color = "gold";
-        } else if (kdValue >= 1) {
+        } else if (kdValue >= 7) {
           msg = "world class";
           color = "#4cf";
-        } else if (kdValue < 0.7) {
+        } else if (kdValue < 3) {
           msg = "incomprendido";
           color = "orange";
-        } else if (kdValue < 1) {
+        } else if (kdValue < 7) {
           msg = "burro";
           color = "red";
         }
