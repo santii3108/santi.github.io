@@ -559,7 +559,7 @@ async function randomizarEquipo() {
     totalKD += parseFloat(el.querySelector(".kd").textContent.replace("kd:", ""));
   });
   const promedio = (totalKD / elegidos.length).toFixed(2);
-  promedioKD.textContent = `KD promedio: ${promedio}`;
+  promedioKD.textContent = `Promedio: ${}`;
   promedioKD.style.textAlign = "center";
 
   // Agregar excluidos a la lista sin animar individualmente
@@ -581,7 +581,7 @@ async function randomizarEquipo() {
 
       const kdSpan = nuevo.querySelector(".kd");
       if (kdSpan) {
-        const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
+        //const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
         let msg = "";
         if (kdValue > 9) msg = "GOAT";
         else if (kdValue > 7) msg = "world class";
