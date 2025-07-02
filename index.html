@@ -402,50 +402,49 @@
   </div>
 <button class="menu-button" onclick="toggleMenu()"></button>
   <script>
-    // Estado de configuración: normal, sale, no-sale
-    const playerConfig = {};
+    // Estado de configuración
+const playerConfig = {};
 
-    function toggleMenu() {
-      const menu = document.getElementById('sideMenu');
-      menu.classList.toggle('open');
-    }
+function toggleMenu() {
+  document.getElementById('sideMenu').classList.toggle('open');
+}
 
-    function toggleConfig(elemento, playerName) {
-      const currentState = playerConfig[playerName] || 'normal';
-      
-      // Ciclo: normal -> sale -> no-sale -> normal
-      let newState;
-      if (currentState === 'normal') {
-        newState = 'sale';
-      } else if (currentState === 'sale') {
-        newState = 'no-sale';
-      } else {
-        newState = 'normal';
+function toggleConfig(elemento, playerName) {
+  const estadoActual = playerConfig[playerName] || 'normal';
+  const nuevoEstado = estadoActual === 'normal' ? 'sale' : estadoActual === 'sale' ? 'no-sale' : 'normal';
+  playerConfig[playerName] = nuevoEstado;
+
+  elemento.classList.remove('forzado-sale', 'forzado-no-sale');
+  if (nuevoEstado === 'sale') elemento.classList.add('forzado-sale');
+  else if (nuevoEstado === 'no-sale') elemento.classList.add('forzado-no-sale');
+}
+
+function toggleSeleccion(elemento) {
+  elemento.classList.toggle('seleccionado');
+}
+
+function fadeIn(element) {
+  element.style.opacity = 0;
+  element.style.display = element.tagName === "UL" ? "block" : "flex";
+  return new Promise(resolve => {
+    let op = 0;
+    const timer = setInterval(() => {
+      op += 0.05;
+      element.style.opacity = op;
+      if (op >= 1) {
+        clearInterval(timer);
+        resolve();
       }
-      
-      playerConfig[playerName] = newState;
-      
-      // Actualizar clases CSS
-      elemento.classList.remove('forzado-sale', 'forzado-no-sale');
-      if (newState === 'sale') {
-        elemento.classList.add('forzado-sale');
-      } else if (newState === 'no-sale') {
-        elemento.classList.add('forzado-no-sale');
-      }
-    }
-
-    function toggleSeleccion(elemento) {
-      elemento.classList.toggle('seleccionado');
-    }
+    }, 50);
+  });
+}
 
 async function randomizarEquipo() {
   const boton = document.querySelector('button[onclick="randomizarEquipo()"]');
   boton.disabled = true;
 
-  const seleccionados = Array.from(document.querySelectorAll('.seleccion li.seleccionado'));
+  const seleccionados = [...document.querySelectorAll('.seleccion li.seleccionado')];
   const errorMsg = document.getElementById("errorMsg");
-
-  // Resetear listas y mensajes
   const lista = document.getElementById("selectedTeam");
   const listaExcluidos = document.getElementById("excludedTeam");
   const titulo = document.getElementById("excluidosTitulo");
@@ -465,19 +464,11 @@ async function randomizarEquipo() {
     return;
   }
 
-  // Obtener jugadores que DEBEN salir
-  const forzadosSale = seleccionados.filter(li => {
-    const nombre = li.querySelector('.nombre').textContent;
-    return playerConfig[nombre] === 'sale';
-  });
+  const getConfig = li => playerConfig[li.querySelector('.nombre').textContent] || 'normal';
+  const forzadosSale = seleccionados.filter(li => getConfig(li) === 'sale');
+  const forzadosNoSale = seleccionados.filter(li => getConfig(li) === 'no-sale');
+  const disponibles = seleccionados.filter(li => getConfig(li) === 'normal');
 
-  // Obtener jugadores que NO PUEDEN salir
-  const forzadosNoSale = seleccionados.filter(li => {
-    const nombre = li.querySelector('.nombre').textContent;
-    return playerConfig[nombre] === 'no-sale';
-  });
-
-  // Verificar que no haya más de 5 forzados a salir
   if (forzadosSale.length > 5) {
     errorMsg.textContent = "No pueden haber más de 5 jugadores forzados a salir.";
     errorMsg.style.display = "block";
@@ -485,17 +476,7 @@ async function randomizarEquipo() {
     return;
   }
 
-  // Jugadores disponibles para randomizar (los que no están forzados)
-  const disponibles = seleccionados.filter(li => {
-    const nombre = li.querySelector('.nombre').textContent;
-    const config = playerConfig[nombre] || 'normal';
-    return config === 'normal';
-  });
-
-  // Calcular cuántos más necesitamos del pool disponible
   const necesarios = 5 - forzadosSale.length;
-  
-  // Verificar que tengamos suficientes jugadores disponibles
   if (disponibles.length < necesarios) {
     errorMsg.textContent = "No hay suficientes jugadores disponibles para completar el equipo.";
     errorMsg.style.display = "block";
@@ -503,152 +484,70 @@ async function randomizarEquipo() {
     return;
   }
 
-  // Randomizar los disponibles y tomar los necesarios
-  const mezcladosDisponibles = disponibles.sort(() => Math.random() - 0.5);
-  const elegidosDelPool = mezcladosDisponibles.slice(0, necesarios);
+  const mezclados = disponibles.sort(() => Math.random() - 0.5).slice(0, necesarios);
+  const elegidos = [...forzadosSale, ...mezclados];
+  const excluidos = seleccionados.filter(li => !elegidos.includes(li));
 
-  // Combinar forzados + elegidos del pool
-  const elegidos = [...forzadosSale, ...elegidosDelPool];
-  
-  // Los excluidos son todos los seleccionados menos los elegidos
-  const excluidosFinal = seleccionados.filter(li => !elegidos.includes(li));
-
-  // Función helper para fadeIn
-  function fadeIn(element) {
-    element.style.opacity = 0;
-    element.style.display = element.tagName === "UL" ? "block" : "flex";
-    return new Promise(resolve => {
-      let op = 0;
-      const timer = setInterval(() => {
-        op += 0.05;
-        element.style.opacity = op;
-        if (op >= 1) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 50);
-    });
-  }
-
-  // Mostrar seleccionados uno por uno con fade y delay de 2 seg
-  for (let i = 0; i < elegidos.length; i++) {
-    const elem = elegidos[i];
-    const nuevo = document.createElement("li");
-    nuevo.style.display = 'flex';
+  for (const elem of elegidos) {
+    const nuevo = elem.cloneNode(true);
     nuevo.style.opacity = 0;
-    nuevo.innerHTML = elem.innerHTML;
-
-    const kdSpan = nuevo.querySelector(".kd");
-    const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
-    let msg = "";
-    if (kdValue > 1.5) msg = "GOAT";
-    else if (kdValue > 1) msg = "world class";
-    else if (kdValue < 0.7) msg = "incomprendido";
-    else if (kdValue < 1) msg = "burro";
-    kdSpan.setAttribute("data-kd", kdValue);
-    kdSpan.setAttribute("data-msg", msg);
-
+    nuevo.removeAttribute("onclick"); // Quita el click
+    nuevo.classList.remove("seleccionado");
     lista.appendChild(nuevo);
     await fadeIn(nuevo);
-    await new Promise(r => setTimeout(r, 2000));
   }
 
-  // Calcular y mostrar KD promedio
-  let totalKD = 0;
-  elegidos.forEach(el => {
-    totalKD += parseFloat(el.querySelector(".kd").textContent.replace("kd:", ""));
-  });
+  const totalKD = elegidos.reduce((sum, li) => sum + parseFloat(li.querySelector(".kd").textContent), 0);
   const promedio = (totalKD / elegidos.length).toFixed(2);
-  promedioKD.textContent = `Promedio: ${}`;
-  promedioKD.style.textAlign = "center";
+  promedioKD.textContent = `Promedio: ${promedio}`;
 
-  // Agregar excluidos a la lista sin animar individualmente
-  if (excluidosFinal.length > 0) {
+  if (excluidos.length > 0) {
     titulo.style.display = "block";
     listaExcluidos.innerHTML = "";
-    const mostrarFoto = excluidosFinal.length <= 3;
-
-    excluidosFinal.forEach(elem => {
-      const nuevo = document.createElement("li");
-      if (!mostrarFoto) {
-        let contenido = elem.innerHTML.replace(/<img[^>]*>/g, "");
-        nuevo.innerHTML = contenido;
-        nuevo.style.fontSize = "0.9em";
-        nuevo.style.padding = "5px 10px";
-      } else {
-        nuevo.innerHTML = elem.innerHTML;
-      }
-
-      const kdSpan = nuevo.querySelector(".kd");
-      if (kdSpan) {
-        const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
-        let msg = "";
-        if (kdValue > 9) msg = "GOAT";
-        else if (kdValue > 7) msg = "world class";
-        else if (kdValue < 4) msg = "incomprendido";
-        else if (kdValue < 7) msg = "burro";
-        kdSpan.setAttribute("data-kd", kdValue);
-        kdSpan.setAttribute("data-msg", msg);
-      }
-
+    const mostrarFoto = excluidos.length <= 3;
+    excluidos.forEach(elem => {
+      const nuevo = elem.cloneNode(true);
+      if (!mostrarFoto) nuevo.querySelector("img").remove();
       listaExcluidos.appendChild(nuevo);
     });
-
-    // Mostrar con fadeIn el título, excluidos y promedio juntos
-    await Promise.all([
-      fadeIn(titulo),
-      fadeIn(listaExcluidos),
-      fadeIn(promedioKD)
-    ]);
+    await Promise.all([fadeIn(titulo), fadeIn(listaExcluidos), fadeIn(promedioKD)]);
   } else {
-    // Si no hay excluidos, mostrar solo el promedio
     await fadeIn(promedioKD);
   }
 
   boton.disabled = false;
 }
 
-        document.querySelectorAll(".kd").forEach(kdSpan => {
-        const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
-        let msg = "";
-        let color = "";
+// Mensajes y colores KD
+function setTitles() {
+  document.querySelectorAll(".kd").forEach(kdSpan => {
+    const kdValue = parseFloat(kdSpan.textContent.replace("kd:", ""));
+    let msg = "", color = "";
+    if (kdValue > 9) { msg = "GOAT"; color = "gold"; }
+    else if (kdValue >= 7) { msg = "world class"; color = "#4cf"; }
+    else if (kdValue < 3) { msg = "incomprendido"; color = "orange"; }
+    else { msg = "burro"; color = "red"; }
 
-        if (kdValue > 9) {
-          msg = "GOAT";
-          color = "gold";
-        } else if (kdValue >= 7) {
-          msg = "world class";
-          color = "#4cf";
-        } else if (kdValue < 3) {
-          msg = "incomprendido";
-          color = "orange";
-        } else if (kdValue < 7) {
-          msg = "burro";
-          color = "red";
-        }
-
-    kdSpan.setAttribute("title", msg);
+    const nombre = kdSpan.closest("li").querySelector(".nombre").textContent.toLowerCase();
+    if (nombre === 'facu') {
+      msg = "baitero de mierda";
+      color = "brown";
+    }
+    kdSpan.title = msg;
     kdSpan.style.setProperty("--msg-color", color);
-
-    document.querySelectorAll('.kd').forEach(kdSpan => {
-        const nombre = kdSpan.parentElement.querySelector('.nombre').textContent.toLowerCase();
-        if (nombre === 'facu') {
-            kdSpan.setAttribute('title', 'baitero de mierda');
-            kdSpan.style.setProperty('--msg-color', 'brown');
-    }
-    });
-
   });
+}
+setTitles();
 
-  // Cerrar menú al hacer clic fuera
-  document.addEventListener('click', function(event) {
-    const menu = document.getElementById('sideMenu');
-    const menuButton = document.querySelector('.menu-button');
-    
-    if (!menu.contains(event.target) && !menuButton.contains(event.target)) {
-      menu.classList.remove('open');
-    }
-  });
+// Cerrar menú al hacer clic fuera
+document.addEventListener('click', event => {
+  const menu = document.getElementById('sideMenu');
+  const button = document.querySelector('.menu-button');
+  if (!menu.contains(event.target) && !button.contains(event.target)) {
+    menu.classList.remove('open');
+  }
+});
+
   </script>
 </body>
 </html>
