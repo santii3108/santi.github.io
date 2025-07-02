@@ -491,7 +491,7 @@ async function randomizarEquipo() {
   for (const elem of elegidos) {
     const nuevo = elem.cloneNode(true);
     nuevo.style.opacity = 0;
-    nuevo.removeAttribute("onclick"); // Quita el click
+    nuevo.removeAttribute("onclick");
     nuevo.classList.remove("seleccionado");
     lista.appendChild(nuevo);
     await fadeIn(nuevo);
@@ -508,6 +508,8 @@ async function randomizarEquipo() {
     excluidos.forEach(elem => {
       const nuevo = elem.cloneNode(true);
       if (!mostrarFoto) nuevo.querySelector("img").remove();
+      nuevo.removeAttribute("onclick");
+      nuevo.classList.remove("seleccionado");
       listaExcluidos.appendChild(nuevo);
     });
     await Promise.all([fadeIn(titulo), fadeIn(listaExcluidos), fadeIn(promedioKD)]);
